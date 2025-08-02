@@ -1,5 +1,6 @@
 from fastapi import APIRouter,Depends,HTTPException,status
 from sqlalchemy.future import select
+from fastapi.security import  OAuth2PasswordRequestForm,OAuth2PasswordBearer
 from .. import schemas,models,utils,oauth2
 from sqlalchemy.ext.asyncio import AsyncSession
 from ..database import get_db
@@ -8,9 +9,10 @@ from uuid import uuid4
 
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 @router.post("/login",)
-async def login(user: schemas.UserLogin, db: AsyncSession = Depends(get_db)):
+async def login(user: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
     res=await db.execute(select(models.Users).where(models.Users.email==user.email))
     res=res.scalar_one_or_none()
     if not res:
