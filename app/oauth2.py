@@ -20,6 +20,7 @@ def verify_access_token(token: str, credentials_exception):
     try:
         payload = jwt.decode(token, settings.secret_key, algorithms=settings.algorithm)
         user_id = payload.get("user_id")
+        print(user_id)
         if user_id is None:
             raise credentials_exception
         return schemas.TokenData(id=user_id)
@@ -31,7 +32,7 @@ def verify_access_token(token: str, credentials_exception):
 async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(database.get_db)):
     credentials_exception=HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail=f"Could not validate credentials",headers={"WWW-Authenticate":"Bearer"})
     access_token = verify_access_token(token, credentials_exception)
-    user = await db.execute(select(models.Users).filter(models.Users.user_id == int(access_token.id)))  # Cast token.id to int
+    user = await db.execute(select(models.Users).filter(models.Users.user_id == str(access_token.id)))
     user = user.scalars().first()
 
     return user

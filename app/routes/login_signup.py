@@ -13,7 +13,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 @router.post("/login",)
 async def login(user: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
-    res=await db.execute(select(models.Users).where(models.Users.email==user.email))
+    res=await db.execute(select(models.Users).where(models.Users.email==user.username))
     res=res.scalar_one_or_none()
     if not res:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="User Not Found!")
